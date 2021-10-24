@@ -52,6 +52,7 @@ extern uint8_t nave_sprite[]; // cargar bitmap desde memoria flash
 extern uint8_t alien_sprite[];
 extern uint8_t vida_sprite[];
 extern uint8_t disparo_nave_sprite[];
+extern uint8_t disparo_alien_sprite[];
 
 struct Sprite { // estructura para sprites
   int x; // posicion x
@@ -78,14 +79,14 @@ bool collision = false; // detección de colisión
 unsigned long previousMillis = 0;  
 const long interval = 42;
 
-char side;
+char side, side2;
 int ataque1, ataque2;
 int vida1, vida2;
 int temp;
 
-int m1;
-int ataque_activo1;
-int yataque;
+int m1, m2;
+int ataque_activo1, ataque_activo2;
+int yataque, yataque2;
 
 int colision1, colision2;
 //***************************************************************************************************************************************
@@ -103,7 +104,7 @@ void setup() {
   pinMode(PUSH2, INPUT_PULLUP);
 
   nave.x = 0;
-  nave.y = 40;
+  nave.y = 150;
   nave.width = 81;
   nave.height = 36;
   nave.columns = 1;
@@ -141,12 +142,14 @@ void loop() {
   // actualización de frame cada 42ms = 24fps
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    bool up = !digitalRead(PUSH1); // lectura de entradas
-    bool down = !digitalRead(PUSH2);
+    bool up1 = !digitalRead(PUSH1); // lectura de entradas
+    bool down1 = !digitalRead(PUSH2);
 
+    bool up2 = 0;
+    bool down2 = 0;
 
-    
-    if (down) { // modificación de atributos de sprite
+    //--------Control del movimiento del J1 por medio de botones
+    if (down2) { // modificación de atributos de sprite
       nave.y += 4;
       nave.index++;
       nave.index %= 3;
@@ -159,37 +162,43 @@ void loop() {
       side = 1;
     }
 
-    
-    /*if (rectUp) { // movimiento de rectángulo
-      FillRect(rect.x, rect.y + rect.height - 5, rect.width, 5, 0x0000); // se colorea resto de rectángulo del frame anterior
-      rect.y-= 5;
-      if (rect.y <= 0) {
-        rectUp = false;
-      }
+    //--------Control de movimiento del J2 por medio de botones---------
+    if (down2) { // modificación de atributos de sprite
+      alien.y += 4;
+      alien.index++;
+      alien.index %= 3;
+      side2 = 0;
     }
-    else {
-      FillRect(rect.x, rect.y, rect.width, 5, 0x0000);
-      rect.y+= 5;
-      if (rect.y >= 200) {
-        rectUp = true;
-      }
-    }  
-    FillRect(rect.x, rect.y, rect.width, rect.height, rect.color);*/
+    if (up2) {
+      alien.y -= 4;
+      alien.index++;
+      alien.index %= 3;
+      side2 = 1;
+    }
 
-    
+    //----------------------Coloreo del resto del sprite en su frame anterior-------------------------
     if (side == 0){ // dependiendo de la dirección, se colorea resto del sprite del frame anterior
       FillRect(nave.x, nave.y -4, nave.width, 4, 0x0000);
     }
     else{
       FillRect(nave.x, nave.y + nave.height, nave.width, 4, 0x0000);
     }
+
+    if (side2 == 0){ // dependiendo de la dirección, se colorea resto del sprite del frame anterior
+      FillRect(alien.x, alien.y -4, alien.width, 4, 0x0000);
+    }
+    else{
+      FillRect(alien.x, alien.y + alien.height, alien.width, 4, 0x0000);
+    }
+
+    //----------------Creación de los sprites en la pantalla TFT------------------
     LCD_Sprite(nave.x, nave.y, nave.width, nave.height, nave_sprite, nave.columns, nave.index, nave.flip, nave.offset);
 
     LCD_Sprite(alien.x, alien.y, alien.width, alien.height, alien_sprite, alien.columns, alien.index, alien.flip, alien.offset);
     
     //-----Control del ataque por medio de los botones-----------
     //Para cuando J1 ataca
-    char ataque1 = up;
+    char ataque1 = down1;
     if (ataque1 == 1) {//Los botones estan config. como Pull-Ups
       yataque = nave.y;
       ataque_activo1 = 1;
@@ -207,12 +216,13 @@ void loop() {
       }
       else {
         ataque_activo1 = 0;
+        colision1 = 0;
       }
     }
 
     if (colision1  == 1 ) {
-      FillRect(m1, yataque, 33, 29, 0x0000);
-      int h = alien.y - yataque;
+      FillRect(m1, yataque, 39, 24, 0x0000);
+      int h = alien.y - nave.y;
       int d = alien.x - nave.x;
       int r = m1 - alien.x;
       int hit = 0;
@@ -220,12 +230,55 @@ void loop() {
       if ((((h < 39)& (d >= 0) & (h >= 0)) | (h <= 0) & (h > -24)) & (hit == 1))vida2++;
       LCD_Sprite(190, 0, 130, 26, vida_sprite, 3, vida2, 1, 0);
 
-      if (hit == 1)colision1 = 0;
-      
+      if (hit == 1)colision1 = 0; 
     }
+
+    //Para cuando J2 ataca
+    char ataque2 = up1;
+    if (ataque2 == 1) {//Los botones estan config. como Pull-Ups
+      yataque2 = alien.y;
+      ataque_activo2 = 1;
+      colision2 = 1;
+      m2 = 269 - 26;
+    }
+    if (ataque_activo2 == 1) {
+      int anim2 = (m2 / 28) % 1;
+      LCD_Sprite(m2, yataque2, 28, 26, disparo_alien_sprite, 1, anim2, 0, 0);
+      FillRect(m2 + 11, yataque2, 10, 26, 0x0000);
+      // a través de FillRect se borra el rastro que deja el ataque
+      m2 -= 10;
+      if (m2 > 28) {
+        ataque_activo2 = 1;
+      }
+      else {
+        ataque_activo2 = 0;
+        colision2 = 0;
+      }
+    }
+
+    if (colision2  == 1 ) {
+      int h = alien.y - nave.y; //se obtiene la posicion en el eje Y de J2 respecto a J1
+      int d = nave.x - alien.x; //se obtiene la posicion en el eje X de J1 respecto a J2
+      int r = m2 - 81; //se obtiene la posicion en el eje X de J1 respecto al Ataque
+      int hit2 = 0; //sirve para saber si el ataque impacto o no en J1
+      if ((r <= 0) & (d <= 0)) {
+        hit2++; //para acertar el ataque el jugador viendo hacia la izquierda
+      }
+      //ambas distancias tienen que ser negativas.
+      if ((((h < 30) & (h >= 0)) | (h <= 0) & (h > -21)) & (hit2 == 1))vida1++; //para acertar el personaje atacado
+      //tiene que estar como máximo 29 unidades arriba del ataque y 21 por debajo del ataque
+      LCD_Sprite(0, 0, 130, 26, vida_sprite, 3, vida1, 0, 0); //el sprite de la vida cambia solo si se cumplen la condiciones ant.
+
+      if (hit2 == 1) {
+        colision2 = 0;
+      }
+    }
+    
   
   }
 }
+
+
 //***************************************************************************************************************************************
 // Función para inicializar LCD
 //***************************************************************************************************************************************
