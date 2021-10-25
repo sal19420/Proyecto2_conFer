@@ -1,13 +1,9 @@
 
 char com2;                         // Variable para la comunicación serial
-#define PU  PB_2              // arriba
-#define PD  PB_3                 // abajo
-#define PA  PB_4                 // ataque
-char zero = 0;
-char uno = 1;
-char dos = 2; 
-char tres = 3;
-#define START  PB_5                  // start
+const int PU = 2;                // arriba
+const int PD  =3 ;                // abajo
+const int  PA  =4 ;                // ataque
+const int START  =5;                  // start
 
 int FLAG = 0;                         // Banderas para arriba
 int FLAG2 = 0;                        // Banderas para abajo
@@ -37,19 +33,11 @@ void loop() {
     delay(10);
 
     if (digitalRead(START) == HIGH){     // Primer botón
-        FLAG7 = 1;                       // Bandera para el antirrebote
+        Serial.write(0);   
+        INICIO = 0;
         
           }
-    else{
-        if(FLAG7 == 1){                  // Si la FLAG está encendida entonces apgarla
-           FLAG7 = 0;                    // Apagar bandera   
-           Serial.write(zero);
-           
-
-
-           INICIO = 0;
-           }
-       }
+   
 
 //                 P R I M E R   J U G A D O R
 
@@ -66,48 +54,22 @@ void loop() {
 
     
     if (digitalRead(PU) == HIGH){   // Primer botón: primer jugador
-        FLAG = 1;                       // Bandera para el antirrebote
+        Serial.write(1);                     
         
-          }
-    else{
-        if(FLAG == 1){                  // Si la FLAG está encendida entonces apgarla
-           FLAG = 0;                    // Apagar bandera   
-          
-           Serial.write(uno);             // Se envía el dato ASCII = 1
-
-             
-           }
-        }
+    }
 
 
     if (digitalRead(PD) == HIGH){   // Segundo botón: Botón especial
-        FLAG2 = 1;                      // Bandera para el antirrebote
-        
+          Serial.write(2);             // Se envía el dato ASCII = 2
           }
-    else{
-        if(FLAG2 == 1){                 // Si la FLAG está encendida entonces apgarla
-           FLAG2 = 0;                   // Apagar bandera   
-           
-           Serial.write(dos);             // Se envía el dato ASCII = 2
-                     
-         
-           }
-        }
+   
 
 
     if (digitalRead(PA) == HIGH){   // Tercer botón: EL otro especial
-        FLAG3 = 1;                      // Bandera para el antirrebote
+       Serial.write(3);            // Se envía el dato ASCII = 3
         
           }
-    else{
-        if(FLAG3 == 1){                 // Si la FLAG está encendida entonces apgarla
-           FLAG3 = 0;                   // Apagar bandera   
-          
-           Serial.write(tres);            // Se envía el dato ASCII = 3
-
-           
-           }
-        }
+  
 
     }
 }

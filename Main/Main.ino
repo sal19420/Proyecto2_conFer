@@ -48,6 +48,9 @@ void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
 bool Collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2);
 
+//***************************************************************************************************************************************
+// Variables y arrays
+//***************************************************************************************************************************************
 extern uint8_t nave_sprite[]; // cargar bitmap desde memoria flash
 extern uint8_t alien_sprite[];
 extern uint8_t vida_sprite[];
@@ -80,15 +83,18 @@ unsigned long previousMillis = 0;
 const long interval = 42;
 
 char side, side2;
-int ataque1, ataque2;
 int vida1, vida2;
-int temp;
 
 int m1, m2;
 int ataque_activo1, ataque_activo2;
 int yataque, yataque2;
 
 int colision1, colision2;
+
+char com;
+char com2;                
+#define BP PA_6
+int buzzerPin = BP;
 //***************************************************************************************************************************************
 // Initialization
 //***************************************************************************************************************************************
@@ -99,7 +105,16 @@ void setup() {
   Serial.println("Start");
   LCD_Init();
   LCD_Clear(0x00);
+
+  Serial.begin(9600);                           // Inicializar C. serial a 9600 bits per second
+  Serial3.begin(9600);                          // Inicializar C. serial a 9600 bits per second
+  Serial2.begin(9600);
   
+  Serial2.setTimeout(50);
+  Serial3.setTimeout(50);                        // T para la transf. de datos
+  delay(100);
+
+  pinMode(buzzerPin,OUTPUT);
   pinMode(PUSH1, INPUT_PULLUP); // botones integrados con como entrada pull-up
   pinMode(PUSH2, INPUT_PULLUP);
 
@@ -138,24 +153,98 @@ void setup() {
 //***************************************************************************************************************************************
 void loop() {
   unsigned long currentMillis = millis();
+  char up1 = 0;
+  char up2 = 0;
+
+  char down1 = 0;
+  char down2 = 0;
+
+  char ataque1 = 0;
+  char ataque2 = 0;
+
+  char start1 = 0;
+  char start2 = 0;
+
+  if (Serial3.available()){                      
+    com = Serial3.read();                   // Guardar lo leído en Message
+    Serial.write(com);                     // Escribir lo que se recibe
+ 
+  delay(4);
+  if(com == 0){                          // Recibe un 1
+      start1 = 1;                 // Start1
+      song1();
+      noTone(buzzerPin);
+  }
+    if(com == 1){                          // Recibe un 1
+      up1 = 1;                 //Up1
+      song();
+      noTone(buzzerPin);
+  }
+
+    if(com == 2){                          // Recibe un 2
+      down1 = 1;                  //Down1
+      song();
+      noTone(buzzerPin);
+  }
+
+   if(com == 3){                          // Recibe un 3
+      ataque1 = 1;                  //Ataque1
+      song();
+      noTone(buzzerPin);
+      
+  }
+   }
+   
+   if (Serial2.available()){                      
+    com2 = Serial2.read();                   // Guardar lo leído en Message
+    Serial.write(com2);                     // Escribir lo que se recibe
+ 
+  delay(4);
+  if(com2 == 0){                          // Recibe un 0
+      start2 = 1;                 //Start2
+      song1();
+      noTone(buzzerPin);
+  }
+    if(com2 == 1){                          // Recibe un 1
+      up2 = 1;                 //Up2
+      song();
+      noTone(buzzerPin);
+  }
+
+    if(com2 == 2){                          // Recibe un 2
+      down2 = 1;                  //Down2
+      song();
+      noTone(buzzerPin);
+  }
+
+   if(com2 == 3){                          // Recibe un 3
+      ataque2 = 1;                  //Ataque2 
+      song();
+      noTone(buzzerPin);
+      
+  }
+   }
+
+   bool left = !digitalRead(PUSH1);
+
+   if (left) {
+    song1();
+    delay(10);
+    noTone(buzzerPin);
+   }
   
   // actualización de frame cada 42ms = 24fps
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    bool up1 = !digitalRead(PUSH1); // lectura de entradas
-    bool down1 = !digitalRead(PUSH2);
-
-    bool up2 = 0;
-    bool down2 = 0;
 
     //--------Control del movimiento del J1 por medio de botones
-    if (down2) { // modificación de atributos de sprite
+    if (down1 == 1) { // modificación de atributos de sprite
       nave.y += 4;
       nave.index++;
       nave.index %= 3;
       side = 0;
     }
-    if (temp) {
+    if (up1 == 1) {
       nave.y -= 4;
       nave.index++;
       nave.index %= 3;
@@ -163,13 +252,13 @@ void loop() {
     }
 
     //--------Control de movimiento del J2 por medio de botones---------
-    if (down2) { // modificación de atributos de sprite
+    if (down2 == 1) { // modificación de atributos de sprite
       alien.y += 4;
       alien.index++;
       alien.index %= 3;
       side2 = 0;
     }
-    if (up2) {
+    if (up2 == 1) {
       alien.y -= 4;
       alien.index++;
       alien.index %= 3;
@@ -198,7 +287,6 @@ void loop() {
     
     //-----Control del ataque por medio de los botones-----------
     //Para cuando J1 ataca
-    char ataque1 = down1;
     if (ataque1 == 1) {//Los botones estan config. como Pull-Ups
       yataque = nave.y;
       ataque_activo1 = 1;
@@ -234,7 +322,6 @@ void loop() {
     }
 
     //Para cuando J2 ataca
-    char ataque2 = up1;
     if (ataque2 == 1) {//Los botones estan config. como Pull-Ups
       yataque2 = alien.y;
       ataque_activo2 = 1;
@@ -274,8 +361,55 @@ void loop() {
       }
     }
     
-  
   }
+  
+}
+
+//----------------------Musicon del Juego----------------------
+void song(){
+  
+  tone(buzzerPin, 233);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 262);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 294);
+  delay(150);
+  noTone(buzzerPin);
+}
+
+void song1(){
+  
+  tone(buzzerPin, 233);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 131);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 147);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 175);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 233);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 262);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 294);
+  delay(150);
+  noTone(buzzerPin);
 }
 
 
