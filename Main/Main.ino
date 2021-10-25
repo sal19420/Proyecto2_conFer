@@ -107,6 +107,8 @@ char ataque2;
 
 char start1;
 char start2;
+
+char comienzo;
 //***************************************************************************************************************************************
 // Initialization
 //***************************************************************************************************************************************
@@ -155,17 +157,17 @@ void setup() {
   rect.color = 0x07E0;
 
   //FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c)
-  FillRect(0, 0, 160, 120, 0x0400);
+  FillRect(0, 0, 320, 240, 0x0400);
 
   //LCD_Print(String text, int x, int y, int fontSize, int color, int background)
-  String text1 = "IE3027";
-  LCD_Print(text1, 110, 110, 2, 0xffff, 0x0000);
+  String text1 = "Defender Battle";
+  LCD_Print(text1, 50, 110, 2, 0xffff, 0x0400);
 
-  //*****************Configuraciones iniciales del juego********************
-    //Se resetean los contadores de la vida
-    vida2 = vida1 = 0;
-    LCD_Sprite(0, 0, 130, 26, vida_sprite, 3, 0, 0, 0);
-    LCD_Sprite(190, 0, 130, 26, vida_sprite, 3, 0, 1, 0);
+  String text2 = "Press Start";
+  LCD_Print(text2, 80, 130, 2, 0xffff, 0x0400);
+
+  comienzo = 1;
+
 }
 //***************************************************************************************************************************************
 // Loop
@@ -173,7 +175,7 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
 
-
+  //---------Comunicación Serial entre los controles y la Tiva-----------
   if (Serial3.available()){                      
     com = Serial3.read();                   // Guardar lo leído en Message
     Serial.write(com);                     // Escribir lo que se recibe
@@ -183,7 +185,6 @@ void loop() {
       start1 = 1;                 // Start1
       //song1();
       //noTone(buzzerPin);
-      start1 = 0;
   }
     if(com == 1){                          // Recibe un 1
       up1 = 1;                 //Up1
@@ -214,7 +215,6 @@ void loop() {
       start2 = 1;                 //Start2
       //song1();
       //noTone(buzzerPin);
-      start2 = 0;
   }
     if(com2 == 1){                          // Recibe un 1
       up2 = 1;                 //Up2
@@ -235,141 +235,195 @@ void loop() {
       
   }
    }
+
+
+  if (start1 == 1 & start2 == 1) {
+
+    if (comienzo == 1) {
+    //*****************Configuraciones iniciales del juego********************
+    //Se resetean los contadores de la vida
+    FillRect(0, 0, 320, 240, 0x0000);
+    vida2 = vida1 = 0;
+    LCD_Sprite(0, 0, 130, 26, vida_sprite, 3, 0, 0, 0);
+    LCD_Sprite(190, 0, 130, 26, vida_sprite, 3, 0, 1, 0);
+    }
+
+
+    if (vida1 < 3 & vida2 < 3) {
+      // actualización de frame cada 42ms = 24fps
+      if (currentMillis - previousMillis >= interval) {
+        previousMillis = currentMillis;
   
-  // actualización de frame cada 42ms = 24fps
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
-
-    //--------Control del movimiento del J1 por medio de botones
-    if (down1 == 1) { // modificación de atributos de sprite
-      nave.y += 4;
-      nave.index++;
-      nave.index %= 3;
-      side = 0;
-      down1 = 0;
-    }
-    if (up1 == 1) {
-      nave.y -= 4;
-      nave.index++;
-      nave.index %= 3;
-      side = 1;
-      up1 = 0;
-    }
-
-    //--------Control de movimiento del J2 por medio de botones---------
-    if (down2 == 1) { // modificación de atributos de sprite
-      alien.y += 4;
-      alien.index++;
-      alien.index %= 3;
-      side2 = 0;
-      down2 = 0;
-    }
-    if (up2 == 1) {
-      alien.y -= 4;
-      alien.index++;
-      alien.index %= 3;
-      side2 = 1;
-      up2 = 0;
-    }
-
-    //----------------------Coloreo del resto del sprite en su frame anterior-------------------------
-    if (side == 0){ // dependiendo de la dirección, se colorea resto del sprite del frame anterior
-      FillRect(nave.x, nave.y -4, nave.width, 4, 0x0000);
-    }
-    else{
-      FillRect(nave.x, nave.y + nave.height, nave.width, 4, 0x0000);
-    }
-
-    if (side2 == 0){ // dependiendo de la dirección, se colorea resto del sprite del frame anterior
-      FillRect(alien.x, alien.y -4, alien.width, 4, 0x0000);
-    }
-    else{
-      FillRect(alien.x, alien.y + alien.height, alien.width, 4, 0x0000);
-    }
-
-    //----------------Creación de los sprites en la pantalla TFT------------------
-    LCD_Sprite(nave.x, nave.y, nave.width, nave.height, nave_sprite, nave.columns, nave.index, nave.flip, nave.offset);
-
-    LCD_Sprite(alien.x, alien.y, alien.width, alien.height, alien_sprite, alien.columns, alien.index, alien.flip, alien.offset);
+        //--------Control del movimiento del J1 por medio de botones
+        if (down1 == 1) { // modificación de atributos de sprite
+          nave.y += 4;
+          nave.index++;
+          nave.index %= 3;
+          side = 0;
+          down1 = 0;
+        }
+        if (up1 == 1) {
+          nave.y -= 4;
+          nave.index++;
+          nave.index %= 3;
+          side = 1;
+          up1 = 0;
+        }
+  
+        //--------Control de movimiento del J2 por medio de botones---------
+        if (down2 == 1) { // modificación de atributos de sprite
+          alien.y += 4;
+          alien.index++;
+          alien.index %= 3;
+          side2 = 0;
+          down2 = 0;
+        }
+        if (up2 == 1) {
+          alien.y -= 4;
+          alien.index++;
+          alien.index %= 3;
+          side2 = 1;
+          up2 = 0;
+        }
     
-    //-----Control del ataque por medio de los botones-----------
-    //Para cuando J1 ataca
-    if (ataque1 == 1) {//Los botones estan config. como Pull-Ups
-      yataque = nave.y;
-      ataque_activo1 = 1;
-      colision1 = 1;
-      m1 = 81;
-      ataque1 = 0;
-    }
-    if (ataque_activo1 == 1) {
-      int anim3 = (m1 / 39) % 1;
-      LCD_Sprite(m1, yataque, 39, 24, disparo_nave_sprite, 1, anim3, 0, 0);
-      FillRect(m1 - 10, yataque, 10, 24, 0x0000);
-      // a través de Vline se borra el rastro que deja el ataque
-      m1 += 10;
-      if (m1 < 320) {
-        ataque_activo1 = 1;
-      }
-      else {
-        ataque_activo1 = 0;
-        colision1 = 0;
-      }
-    }
-
-    if (colision1  == 1 ) {
-      FillRect(m1, yataque, 39, 24, 0x0000);
-      int h = alien.y - nave.y;
-      int d = alien.x - nave.x;
-      int r = m1 - alien.x;
-      int hit = 0;
-      if ((r >= 0) & (d >= 0))hit++;
-      if ((((h < 39)& (d >= 0) & (h >= 0)) | (h <= 0) & (h > -24)) & (hit == 1))vida2++;
-      LCD_Sprite(190, 0, 130, 26, vida_sprite, 3, vida2, 1, 0);
-
-      if (hit == 1)colision1 = 0; 
-    }
-
-    //Para cuando J2 ataca
-    if (ataque2 == 1) {//Los botones estan config. como Pull-Ups
-      yataque2 = alien.y;
-      ataque_activo2 = 1;
-      colision2 = 1;
-      m2 = 269 - 26;
-      ataque2 = 0;
-    }
-    if (ataque_activo2 == 1) {
-      int anim2 = (m2 / 28) % 1;
-      LCD_Sprite(m2, yataque2, 28, 26, disparo_alien_sprite, 1, anim2, 0, 0);
-      FillRect(m2 + 11, yataque2, 10, 26, 0x0000);
-      // a través de FillRect se borra el rastro que deja el ataque
-      m2 -= 10;
-      if (m2 > 28) {
-        ataque_activo2 = 1;
-      }
-      else {
-        ataque_activo2 = 0;
-        colision2 = 0;
-      }
-    }
-
-    if (colision2  == 1 ) {
-      int h = alien.y - nave.y; //se obtiene la posicion en el eje Y de J2 respecto a J1
-      int d = nave.x - alien.x; //se obtiene la posicion en el eje X de J1 respecto a J2
-      int r = m2 - 81; //se obtiene la posicion en el eje X de J1 respecto al Ataque
-      int hit2 = 0; //sirve para saber si el ataque impacto o no en J1
-      if ((r <= 0) & (d <= 0)) {
-        hit2++; //para acertar el ataque el jugador viendo hacia la izquierda
-      }
-      //ambas distancias tienen que ser negativas.
-      if ((((h < 30) & (h >= 0)) | (h <= 0) & (h > -21)) & (hit2 == 1))vida1++; //para acertar el personaje atacado
-      //tiene que estar como máximo 29 unidades arriba del ataque y 21 por debajo del ataque
-      LCD_Sprite(0, 0, 130, 26, vida_sprite, 3, vida1, 0, 0); //el sprite de la vida cambia solo si se cumplen la condiciones ant.
-
-      if (hit2 == 1) {
-        colision2 = 0;
-      }
-    }
+        //----------------------Coloreo del resto del sprite en su frame anterior-------------------------
+        if (side == 0){ // dependiendo de la dirección, se colorea resto del sprite del frame anterior
+          FillRect(nave.x, nave.y -4, nave.width, 4, 0x0000);
+        }
+        else{
+          FillRect(nave.x, nave.y + nave.height, nave.width, 4, 0x0000);
+        }
     
+        if (side2 == 0){ // dependiendo de la dirección, se colorea resto del sprite del frame anterior
+          FillRect(alien.x, alien.y -4, alien.width, 4, 0x0000);
+        }
+        else{
+          FillRect(alien.x, alien.y + alien.height, alien.width, 4, 0x0000);
+        }
+    
+        //----------------Creación de los sprites en la pantalla TFT------------------
+        LCD_Sprite(nave.x, nave.y, nave.width, nave.height, nave_sprite, nave.columns, nave.index, nave.flip, nave.offset);
+    
+        LCD_Sprite(alien.x, alien.y, alien.width, alien.height, alien_sprite, alien.columns, alien.index, alien.flip, alien.offset);
+        
+        //-----Control del ataque por medio de los botones-----------
+        //Para cuando J1 ataca
+        if (ataque1 == 1) {//Los botones estan config. como Pull-Ups
+          yataque = nave.y;
+          ataque_activo1 = 1;
+          colision1 = 1;
+          m1 = 81;
+          ataque1 = 0;
+        }
+        if (ataque_activo1 == 1) {
+          int anim3 = (m1 / 39) % 1;
+          LCD_Sprite(m1, yataque, 39, 24, disparo_nave_sprite, 1, anim3, 0, 0);
+          FillRect(m1 - 10, yataque, 10, 24, 0x0000);
+          // a través de Vline se borra el rastro que deja el ataque
+          m1 += 10;
+          if (m1 < 320) {
+            ataque_activo1 = 1;
+          }
+          else {
+            ataque_activo1 = 0;
+            colision1 = 0;
+          }
+        }
+    
+        if (colision1  == 1 ) {
+          FillRect(m1, yataque, 39, 24, 0x0000);
+          int h = alien.y - nave.y;
+          int d = alien.x - nave.x;
+          int r = m1 - alien.x;
+          int hit = 0;
+          if ((r >= 0) & (d >= 0))hit++;
+          if ((((h < 39)& (d >= 0) & (h >= 0)) | (h <= 0) & (h > -24)) & (hit == 1))vida2++;
+          LCD_Sprite(190, 0, 130, 26, vida_sprite, 3, vida2, 1, 0);
+    
+          if (hit == 1)colision1 = 0; 
+        }
+    
+        //Para cuando J2 ataca
+        if (ataque2 == 1) {//Los botones estan config. como Pull-Ups
+          yataque2 = alien.y;
+          ataque_activo2 = 1;
+          colision2 = 1;
+          m2 = 269 - 26;
+          ataque2 = 0;
+        }
+        if (ataque_activo2 == 1) {
+          int anim2 = (m2 / 28) % 1;
+          LCD_Sprite(m2, yataque2, 28, 26, disparo_alien_sprite, 1, anim2, 0, 0);
+          FillRect(m2 + 11, yataque2, 10, 26, 0x0000);
+          // a través de FillRect se borra el rastro que deja el ataque
+          m2 -= 10;
+          if (m2 > 28) {
+            ataque_activo2 = 1;
+          }
+          else {
+            ataque_activo2 = 0;
+            colision2 = 0;
+          }
+        }
+    
+        if (colision2  == 1 ) {
+          int h = alien.y - nave.y; //se obtiene la posicion en el eje Y de J2 respecto a J1
+          int d = nave.x - alien.x; //se obtiene la posicion en el eje X de J1 respecto a J2
+          int r = m2 - 81; //se obtiene la posicion en el eje X de J1 respecto al Ataque
+          int hit2 = 0; //sirve para saber si el ataque impacto o no en J1
+          if ((r <= 0) & (d <= 0)) {
+            hit2++; //para acertar el ataque el jugador viendo hacia la izquierda
+          }
+          //ambas distancias tienen que ser negativas.
+          if ((((h < 30) & (h >= 0)) | (h <= 0) & (h > -21)) & (hit2 == 1))vida1++; //para acertar el personaje atacado
+          //tiene que estar como máximo 29 unidades arriba del ataque y 21 por debajo del ataque
+          LCD_Sprite(0, 0, 130, 26, vida_sprite, 3, vida1, 0, 0); //el sprite de la vida cambia solo si se cumplen la condiciones ant.
+    
+          if (hit2 == 1) {
+            colision2 = 0;
+          }
+        }
+
+        comienzo = 0;
+
+        if (vida1 == 3) {
+            String textj1 = "Ganador J2";
+            LCD_Print(textj1, 70, 110, 2, 0xffff, 0x0000);
+            comienzo = 1;
+            start1 = 0;
+            start2 = 0;
+            delay(1000);
+            //FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c)
+            FillRect(0, 0, 320, 240, 0x0400);
+
+            //LCD_Print(String text, int x, int y, int fontSize, int color, int background)
+            String text3 = "Defender Battle";
+            LCD_Print(text3, 50, 110, 2, 0xffff, 0x0400);
+
+            String text4 = "Press Start";
+            LCD_Print(text4, 80, 130, 2, 0xffff, 0x0400);
+          }
+
+        if (vida2 == 3) {
+            String textj2 = "Ganador J1";
+            LCD_Print(textj2, 70, 110, 2, 0xffff, 0x0000);
+            comienzo = 1;
+            start1 = 0;
+            start2 = 0;
+            delay(1000);
+            //FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c)
+            FillRect(0, 0, 320, 240, 0x0400);
+
+            //LCD_Print(String text, int x, int y, int fontSize, int color, int background)
+            String text5 = "Defender Battle";
+            LCD_Print(text5, 50, 110, 2, 0xffff, 0x0400);
+
+            String text6 = "Press Start";
+            LCD_Print(text6, 80, 130, 2, 0xffff, 0x0400);
+          }
+        
+      }
+    }
   }
   
 }
