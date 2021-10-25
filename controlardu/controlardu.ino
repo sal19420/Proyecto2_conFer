@@ -4,7 +4,7 @@ const int PU = 2;                // arriba
 const int PD  =3 ;                // abajo
 const int  PA  =4 ;                // ataque
 const int START  =5;                  // start
-
+int buzzerPin = 6;
 int FLAG = 0;                         // Banderas para arriba
 int FLAG2 = 0;                        // Banderas para abajo
 int FLAG3 = 0;                        // Banderas para ataque
@@ -23,7 +23,8 @@ void setup() {
   pinMode(PU, INPUT_PULLUP);      // Hacer el pin un input pull up  
   pinMode(PD, INPUT_PULLUP);        
   pinMode(PA, INPUT_PULLUP);      
-  pinMode(START, INPUT_PULLUP);       
+  pinMode(START, INPUT_PULLUP);      
+  pinMode(buzzerPin,OUTPUT); 
 }
 
 //*****************************************************************************************
@@ -36,6 +37,10 @@ void loop() {
         Serial.write(0);   
         INICIO = 0;
         
+          song();  
+          delay(10); 
+          noTone(buzzerPin);
+
           }
    
 
@@ -54,22 +59,65 @@ void loop() {
 
     
     if (digitalRead(PU) == HIGH){   // Primer botón: primer jugador
-        Serial.write(1);                     
+        Serial.write(1);    
+        song1();  
+          delay(10); 
+          noTone(buzzerPin);                 
         
     }
 
 
     if (digitalRead(PD) == HIGH){   // Segundo botón: Botón especial
           Serial.write(2);             // Se envía el dato ASCII = 2
+           song1();  
+          delay(10); 
+          noTone(buzzerPin);
           }
    
 
 
     if (digitalRead(PA) == HIGH){   // Tercer botón: EL otro especial
        Serial.write(3);            // Se envía el dato ASCII = 3
+        song1();  
+          delay(10); 
+          noTone(buzzerPin);
         
           }
   
 
     }
+}
+void song(){
+  
+  tone(buzzerPin, 233);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 131);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 147);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 175);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 233);
+  delay(150);
+  noTone(buzzerPin);
+}
+
+void song1(){
+  
+  tone(buzzerPin, 233);
+  delay(150);
+  noTone(buzzerPin);
+
+  tone(buzzerPin, 131);
+  delay(150);
+  noTone(buzzerPin);
+
 }
