@@ -95,6 +95,18 @@ char com;
 char com2;                
 #define BP PA_6
 int buzzerPin = BP;
+
+char up1;
+char up2;
+
+char down1;
+char down2;
+
+char ataque1;
+char ataque2;
+
+char start1;
+char start2;
 //***************************************************************************************************************************************
 // Initialization
 //***************************************************************************************************************************************
@@ -142,6 +154,13 @@ void setup() {
   rect.height = 40;
   rect.color = 0x07E0;
 
+  //FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c)
+  FillRect(0, 0, 160, 120, 0x0400);
+
+  //LCD_Print(String text, int x, int y, int fontSize, int color, int background)
+  String text1 = "IE3027";
+  LCD_Print(text1, 110, 110, 2, 0xffff, 0x0000);
+
   //*****************Configuraciones iniciales del juego********************
     //Se resetean los contadores de la vida
     vida2 = vida1 = 0;
@@ -153,17 +172,7 @@ void setup() {
 //***************************************************************************************************************************************
 void loop() {
   unsigned long currentMillis = millis();
-  char up1 = 0;
-  char up2 = 0;
 
-  char down1 = 0;
-  char down2 = 0;
-
-  char ataque1 = 0;
-  char ataque2 = 0;
-
-  char start1 = 0;
-  char start2 = 0;
 
   if (Serial3.available()){                      
     com = Serial3.read();                   // Guardar lo leído en Message
@@ -172,25 +181,26 @@ void loop() {
   delay(4);
   if(com == 0){                          // Recibe un 1
       start1 = 1;                 // Start1
-      song1();
-      noTone(buzzerPin);
+      //song1();
+      //noTone(buzzerPin);
+      start1 = 0;
   }
     if(com == 1){                          // Recibe un 1
       up1 = 1;                 //Up1
-      song();
-      noTone(buzzerPin);
+      //song();
+      //noTone(buzzerPin);
   }
 
     if(com == 2){                          // Recibe un 2
       down1 = 1;                  //Down1
-      song();
-      noTone(buzzerPin);
+      //song();
+      //noTone(buzzerPin);
   }
 
    if(com == 3){                          // Recibe un 3
       ataque1 = 1;                  //Ataque1
-      song();
-      noTone(buzzerPin);
+      //song();
+      //noTone(buzzerPin);
       
   }
    }
@@ -202,35 +212,28 @@ void loop() {
   delay(4);
   if(com2 == 0){                          // Recibe un 0
       start2 = 1;                 //Start2
-      song1();
-      noTone(buzzerPin);
+      //song1();
+      //noTone(buzzerPin);
+      start2 = 0;
   }
     if(com2 == 1){                          // Recibe un 1
       up2 = 1;                 //Up2
-      song();
-      noTone(buzzerPin);
+      //song();
+      //noTone(buzzerPin);
   }
 
     if(com2 == 2){                          // Recibe un 2
       down2 = 1;                  //Down2
-      song();
-      noTone(buzzerPin);
+      //song();
+      //noTone(buzzerPin);
   }
 
    if(com2 == 3){                          // Recibe un 3
       ataque2 = 1;                  //Ataque2 
-      song();
-      noTone(buzzerPin);
+      //song();
+      //noTone(buzzerPin);
       
   }
-   }
-
-   bool left = !digitalRead(PUSH1);
-
-   if (left) {
-    song1();
-    delay(10);
-    noTone(buzzerPin);
    }
   
   // actualización de frame cada 42ms = 24fps
@@ -243,12 +246,14 @@ void loop() {
       nave.index++;
       nave.index %= 3;
       side = 0;
+      down1 = 0;
     }
     if (up1 == 1) {
       nave.y -= 4;
       nave.index++;
       nave.index %= 3;
       side = 1;
+      up1 = 0;
     }
 
     //--------Control de movimiento del J2 por medio de botones---------
@@ -257,12 +262,14 @@ void loop() {
       alien.index++;
       alien.index %= 3;
       side2 = 0;
+      down2 = 0;
     }
     if (up2 == 1) {
       alien.y -= 4;
       alien.index++;
       alien.index %= 3;
       side2 = 1;
+      up2 = 0;
     }
 
     //----------------------Coloreo del resto del sprite en su frame anterior-------------------------
@@ -292,6 +299,7 @@ void loop() {
       ataque_activo1 = 1;
       colision1 = 1;
       m1 = 81;
+      ataque1 = 0;
     }
     if (ataque_activo1 == 1) {
       int anim3 = (m1 / 39) % 1;
@@ -327,6 +335,7 @@ void loop() {
       ataque_activo2 = 1;
       colision2 = 1;
       m2 = 269 - 26;
+      ataque2 = 0;
     }
     if (ataque_activo2 == 1) {
       int anim2 = (m2 / 28) % 1;
@@ -366,7 +375,7 @@ void loop() {
 }
 
 //----------------------Musicon del Juego----------------------
-void song(){
+/*void song(){
   
   tone(buzzerPin, 233);
   delay(150);
@@ -410,7 +419,7 @@ void song1(){
   tone(buzzerPin, 294);
   delay(150);
   noTone(buzzerPin);
-}
+}*/
 
 
 //***************************************************************************************************************************************

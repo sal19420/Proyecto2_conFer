@@ -83,6 +83,7 @@ void loop() {
       
   }
    }
+   
    if (Serial2.available()){                      
     com2 = Serial2.read();                   // Guardar lo leído en Message
     Serial.write(com2);                     // Escribir lo que se recibe
@@ -141,22 +142,6 @@ void loop() {
 }
 void song(){
   
-//  tone(buzzerPin, 233);
-//  delay(150);
-//  noTone(buzzerPin);
-//
-//  tone(buzzerPin, 131);
-//  delay(150);
-//  noTone(buzzerPin);
-//
-//  tone(buzzerPin, 147);
-//  delay(150);
-//  noTone(buzzerPin);
-//
-//  tone(buzzerPin, 175);
-//  delay(150);
-//  noTone(buzzerPin);
-
   tone(buzzerPin, 233);
   delay(150);
   noTone(buzzerPin);

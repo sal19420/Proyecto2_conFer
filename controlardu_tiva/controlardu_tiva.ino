@@ -3,10 +3,10 @@ char com2;                         // Variable para la comunicación serial
 #define PU  PB_2              // arriba
 #define PD  PB_3                 // abajo
 #define PA  PB_4                 // ataque
-char zero = 0;
-char uno = 1;
-char dos = 2; 
-char tres = 3;
+char zero = 48;
+char uno = 49;
+char dos = 50; 
+char tres = 51;
 #define START  PB_5                  // start
 
 int FLAG = 0;                         // Banderas para arriba
@@ -23,6 +23,8 @@ unsigned char INICIO = 1;             // Flag para el Inicio
 //******************************************************************************************
 void setup() {
   Serial.begin(9600);                 // Inicializar C. serial a 9600 bits per second
+  Serial2.begin(9600);
+  Serial2.setTimeout(50);
   delay(100);
   pinMode(PU, INPUT_PULLUP);      // Hacer el pin un input pull up  
   pinMode(PD, INPUT_PULLUP);        
